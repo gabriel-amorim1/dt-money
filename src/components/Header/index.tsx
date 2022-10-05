@@ -5,10 +5,18 @@ import { HeaderContainer, HeaderContent, NewTransactionButton } from './styles'
 import { NewTransactionModal } from '../NewTransactionModal'
 import { TransactionsContext } from '../../contexts/TransactionsContext'
 import logoImg from '../../assets/logo.svg'
-import { useContext } from 'react'
+import { useContextSelector } from 'use-context-selector'
 
 export function Header() {
-  const { isModalOpen, openModal } = useContext(TransactionsContext)
+  const { isModalOpen, openModal } = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return {
+        isModalOpen: context.isModalOpen,
+        openModal: context.openModal,
+      }
+    },
+  )
 
   return (
     <HeaderContainer>
