@@ -23,6 +23,38 @@
       "category": "Educação",
       "price": 1980,
       "createdAt": "2022-10-05T04:12:34.316Z"
+    },
+    {
+      "description": "Desenvolvimento de app",
+      "price": 10000,
+      "category": "Venda",
+      "type": "income",
+      "createdAt": "2022-10-05T06:07:38.185Z",
+      "id": 4
+    },
+    {
+      "description": "Uber",
+      "price": 30,
+      "category": "Mobilidade",
+      "type": "outcome",
+      "createdAt": "2022-10-05T06:17:22.361Z",
+      "id": 5
+    },
+    {
+      "description": "Ultiminha",
+      "price": 1243,
+      "category": "dgjk",
+      "type": "outcome",
+      "createdAt": "2022-10-05T06:36:33.871Z",
+      "id": 6
+    },
+    {
+      "description": "a",
+      "price": 1,
+      "category": "a",
+      "type": "outcome",
+      "createdAt": "2022-10-05T06:36:51.642Z",
+      "id": 7
     }
   ]
 }

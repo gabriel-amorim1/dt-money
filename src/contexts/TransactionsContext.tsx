@@ -11,28 +11,59 @@ interface Transaction {
   createdAt: string;
 }
 
-interface TransactionsContextType {
-  transactions: Transaction[];
-  fetchTransactions: (query?: string) => Promise<void>;
+interface CreateTransactionInput {
+  description: string;
+  price: number;
+  category: string;
+  type: "income" | "outcome";
 }
 
-export const TransactionsContext = createContext({} as TransactionsContextType);
+interface TransactionsContextType {
+  transactions: Transaction[];
+  isModalOpen: boolean;
+  fetchTransactions: (query?: string) => Promise<void>;
+  createTransaction: (data: CreateTransactionInput) => Promise<void>;
+  openModal: (open: boolean) => void;
+}
 
 interface TransactionsProviderProps {
   children: ReactNode;
 }
 
+export const TransactionsContext = createContext({} as TransactionsContextType);
+
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   async function fetchTransactions(query?: string) {
     const response = await api.get('transactions', {
       params: {
+        _sort: 'createdAt',
+        _order: 'desc',
         q: query,
       }
     })
 
     setTransactions(response.data);
+  }
+
+  async function createTransaction(data: CreateTransactionInput) {
+    const { description, price, category, type } = data;
+
+    const response = await api.post('transactions', { 
+      description, 
+      price, 
+      category, 
+      type,
+      createdAt: new Date(),
+    });
+
+    setTransactions(state => [response.data, ...state]);
+  }
+
+  function openModal(open: boolean) {
+    setIsModalOpen(open);
   }
 
   useEffect(() => {
@@ -42,7 +73,10 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   return (
     <TransactionsContext.Provider value={{ 
       transactions,
+      isModalOpen,
       fetchTransactions,
+      createTransaction,
+      openModal,
     }}>
       {children}
     </TransactionsContext.Provider>
