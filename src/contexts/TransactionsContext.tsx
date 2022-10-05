@@ -1,40 +1,40 @@
-import { ReactNode, createContext, useEffect, useState } from "react";
+import { ReactNode, createContext, useEffect, useState } from 'react'
 
-import { api } from "../lib/axios";
+import { api } from '../lib/axios'
 
 interface Transaction {
-  id: number;
-  description: string;
-  type: 'income' | 'outcome';
-  category: string;
-  price: number;
-  createdAt: string;
+  id: number
+  description: string
+  type: 'income' | 'outcome'
+  category: string
+  price: number
+  createdAt: string
 }
 
 interface CreateTransactionInput {
-  description: string;
-  price: number;
-  category: string;
-  type: "income" | "outcome";
+  description: string
+  price: number
+  category: string
+  type: 'income' | 'outcome'
 }
 
 interface TransactionsContextType {
-  transactions: Transaction[];
-  isModalOpen: boolean;
-  fetchTransactions: (query?: string) => Promise<void>;
-  createTransaction: (data: CreateTransactionInput) => Promise<void>;
-  openModal: (open: boolean) => void;
+  transactions: Transaction[]
+  isModalOpen: boolean
+  fetchTransactions: (query?: string) => Promise<void>
+  createTransaction: (data: CreateTransactionInput) => Promise<void>
+  openModal: (open: boolean) => void
 }
 
 interface TransactionsProviderProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
-export const TransactionsContext = createContext({} as TransactionsContextType);
+export const TransactionsContext = createContext({} as TransactionsContextType)
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   async function fetchTransactions(query?: string) {
     const response = await api.get('transactions', {
@@ -42,42 +42,44 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         _sort: 'createdAt',
         _order: 'desc',
         q: query,
-      }
+      },
     })
 
-    setTransactions(response.data);
+    setTransactions(response.data)
   }
 
   async function createTransaction(data: CreateTransactionInput) {
-    const { description, price, category, type } = data;
+    const { description, price, category, type } = data
 
-    const response = await api.post('transactions', { 
-      description, 
-      price, 
-      category, 
+    const response = await api.post('transactions', {
+      description,
+      price,
+      category,
       type,
       createdAt: new Date(),
-    });
+    })
 
-    setTransactions(state => [response.data, ...state]);
+    setTransactions((state) => [response.data, ...state])
   }
 
   function openModal(open: boolean) {
-    setIsModalOpen(open);
+    setIsModalOpen(open)
   }
 
   useEffect(() => {
-    fetchTransactions();
+    fetchTransactions()
   }, [])
-  
+
   return (
-    <TransactionsContext.Provider value={{ 
-      transactions,
-      isModalOpen,
-      fetchTransactions,
-      createTransaction,
-      openModal,
-    }}>
+    <TransactionsContext.Provider
+      value={{
+        transactions,
+        isModalOpen,
+        fetchTransactions,
+        createTransaction,
+        openModal,
+      }}
+    >
       {children}
     </TransactionsContext.Provider>
   )
