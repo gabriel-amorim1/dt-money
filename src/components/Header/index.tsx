@@ -2,7 +2,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 
 import { HeaderContainer, HeaderContent, NewTransactionButton } from './styles'
 
-import { NewTransactionModal } from '../NewTransactionModal'
+import { SaveTransactionModal } from '../SaveTransactionModal'
 import { TransactionsContext } from '../../contexts/TransactionsContext'
 import logoImg from '../../assets/logo.svg'
 import { useContextSelector } from 'use-context-selector'
@@ -28,7 +28,7 @@ export function Header() {
             <NewTransactionButton>Nova transação</NewTransactionButton>
           </Dialog.Trigger>
 
-          <NewTransactionModal />
+          <SaveTransactionModal />
         </Dialog.Root>
       </HeaderContent>
     </HeaderContainer>
