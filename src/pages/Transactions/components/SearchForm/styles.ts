@@ -1,7 +1,8 @@
 import styled from 'styled-components'
 
 export const SearchFormContainer = styled.form`
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 0.75fr 0.75fr auto;
   gap: 1rem;
 
   input {

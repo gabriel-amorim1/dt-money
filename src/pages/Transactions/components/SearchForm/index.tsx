@@ -9,6 +9,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 const searchFormSchema = z.object({
   query: z.string(),
+  initialDate: z.string(),
+  finalDate: z.string(),
 })
 
 type SearchFormInputs = z.infer<typeof searchFormSchema>
@@ -28,7 +30,7 @@ export function SearchForm() {
   })
 
   async function handleSearchTransactions(data: SearchFormInputs) {
-    await fetchTransactions({ query: data.query })
+    await fetchTransactions(data)
   }
 
   return (
@@ -38,6 +40,14 @@ export function SearchForm() {
         placeholder="Busque por transações"
         {...register('query')}
       />
+
+      <input
+        type="date"
+        placeholder="Data inicial"
+        {...register('initialDate')}
+      />
+
+      <input type="date" placeholder="Data final" {...register('finalDate')} />
 
       <button type="submit" disabled={isSubmitting}>
         <MagnifyingGlass size={20} />

@@ -27,6 +27,8 @@ interface TransactionsPaginate {
 interface FetchTransactionsOptions {
   page?: number
   query?: string
+  initialDate?: string
+  finalDate?: string
 }
 
 interface TransactionsContextType {
@@ -64,6 +66,8 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
           _sort: 'createdAt',
           _order: 'desc',
           q: options?.query,
+          createdAt_gte: options?.initialDate,
+          createdAt_lte: options?.finalDate,
         },
       })
 
