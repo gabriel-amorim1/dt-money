@@ -3,7 +3,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { api } from '../lib/axios'
 import { createContext } from 'use-context-selector'
 
-interface Transaction {
+export interface Transaction {
   id: number
   description: string
   type: 'income' | 'outcome'
@@ -39,6 +39,7 @@ interface TransactionsContextType {
   openModal: (open: boolean) => void
   selectEditTransaction: (transaction: Transaction) => void
   editTransaction: (data: Transaction) => Promise<void>
+  deleteTransaction: (id: number) => Promise<void>
 }
 
 interface TransactionsProviderProps {
@@ -112,6 +113,14 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     setTransactionToEdit(undefined)
   }, [])
 
+  const deleteTransaction = useCallback(async (id: number) => {
+    await api.delete(`transactions/${id}`)
+
+    setTransactions((state) =>
+      state.filter((transaction) => transaction.id === id),
+    )
+  }, [])
+
   const selectEditTransaction = useCallback((transaction: Transaction) => {
     setTransactionToEdit(transaction)
     setIsModalOpen(true)
@@ -141,6 +150,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         openModal,
         selectEditTransaction,
         editTransaction,
+        deleteTransaction,
       }}
     >
       {children}

@@ -7,26 +7,59 @@ import {
   TransactionsTable,
 } from './styles'
 import { Copy, PencilSimpleLine, Trash } from 'phosphor-react'
+import {
+  Transaction,
+  TransactionsContext,
+} from '../../contexts/TransactionsContext'
 import { dateFormatter, priceFormatter } from '../../utils/formatter'
 
+import { ConfirmationModal } from '../../components/ConfirmationModal'
 import { Header } from '../../components/Header'
 import { Pagination } from '../../components/Pagination'
 import { SaveTransactionModal } from '../../components/SaveTransactionModal'
 import { SearchForm } from './components/SearchForm'
 import { Summary } from '../../components/Summary'
-import { TransactionsContext } from '../../contexts/TransactionsContext'
 import { useContextSelector } from 'use-context-selector'
+import { useState } from 'react'
 
 export function Transactions() {
-  const { isModalOpen, openModal, transactions, selectEditTransaction } =
-    useContextSelector(TransactionsContext, (context) => {
-      return {
-        transactions: context.transactions,
-        isModalOpen: context.isModalOpen,
-        openModal: context.openModal,
-        selectEditTransaction: context.selectEditTransaction,
-      }
-    })
+  const {
+    isModalOpen,
+    openModal,
+    transactions,
+    selectEditTransaction,
+    createTransaction,
+    deleteTransaction,
+  } = useContextSelector(TransactionsContext, (context) => {
+    return {
+      transactions: context.transactions,
+      isModalOpen: context.isModalOpen,
+      openModal: context.openModal,
+      selectEditTransaction: context.selectEditTransaction,
+      createTransaction: context.createTransaction,
+      deleteTransaction: context.deleteTransaction,
+    }
+  })
+  const [isDuplicateModalOpen, setDuplicateModalOpen] = useState(false)
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+
+  function handleCloseDuplicateModal() {
+    setDuplicateModalOpen(false)
+  }
+
+  function handleCloseDeleteModal() {
+    setDeleteModalOpen(false)
+  }
+
+  async function handleDuplicateTransaction(transaction: Transaction) {
+    await createTransaction(transaction)
+    handleCloseDuplicateModal()
+  }
+
+  async function handleDeleteTransaction(transaction: Transaction) {
+    await deleteTransaction(transaction.id)
+    handleCloseDeleteModal()
+  }
 
   return (
     <div>
@@ -41,7 +74,7 @@ export function Transactions() {
             {transactions.map((transaction) => {
               return (
                 <tr key={transaction.id}>
-                  <td width="50%">{transaction.description}</td>
+                  <td width="40%">{transaction.description}</td>
                   <td>
                     <PriceHighlight variant={transaction.type}>
                       {transaction.type === 'outcome' && '- '}
@@ -54,9 +87,23 @@ export function Transactions() {
                   </td>
                   <td>
                     <ButtonActionsContainer>
-                      <button>
-                        <Copy size={20} />
-                      </button>
+                      <Dialog.Root
+                        open={isDuplicateModalOpen}
+                        onOpenChange={setDuplicateModalOpen}
+                      >
+                        <Dialog.Trigger asChild>
+                          <button>
+                            <Copy size={20} />
+                          </button>
+                        </Dialog.Trigger>
+
+                        <ConfirmationModal
+                          title="Duplicar Transação"
+                          message="Tem certeza que deseja duplicar essa transação?"
+                          action={() => handleDuplicateTransaction(transaction)}
+                          closeModal={handleCloseDuplicateModal}
+                        />
+                      </Dialog.Root>
                       <Dialog.Root open={isModalOpen} onOpenChange={openModal}>
                         <Dialog.Trigger asChild>
                           <button
@@ -68,9 +115,23 @@ export function Transactions() {
 
                         <SaveTransactionModal />
                       </Dialog.Root>
-                      <button>
-                        <Trash size={20} />
-                      </button>
+                      <Dialog.Root
+                        open={isDeleteModalOpen}
+                        onOpenChange={setDeleteModalOpen}
+                      >
+                        <Dialog.Trigger asChild>
+                          <button>
+                            <Trash size={20} />
+                          </button>
+                        </Dialog.Trigger>
+
+                        <ConfirmationModal
+                          title="Deletar Transação"
+                          message="Tem certeza que deseja deletar essa transação?"
+                          action={() => handleDeleteTransaction(transaction)}
+                          closeModal={handleCloseDeleteModal}
+                        />
+                      </Dialog.Root>
                     </ButtonActionsContainer>
                   </td>
                 </tr>
