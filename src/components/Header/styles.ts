@@ -16,6 +16,24 @@ export const HeaderContent = styled.div`
   align-items: center;
 `
 
+export const InfoAndActionsContainer = styled.div`
+  display: flex;
+  gap: 2.5rem;
+`
+
+export const BalanceContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  strong {
+    color: ${(props) => props.theme['gray-100']};
+  }
+
+  span {
+    color: ${(props) => props.theme['gray-300']};
+  }
+`
+
 export const NewTransactionButton = styled.button`
   height: 50px;
   border: 0;

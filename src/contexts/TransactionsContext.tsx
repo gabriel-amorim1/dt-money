@@ -12,7 +12,7 @@ export interface Transaction {
   createdAt: string
 }
 
-interface CreateTransactionInput {
+export interface CreateTransactionInput {
   description: string
   price: number
   category: string
@@ -33,13 +33,9 @@ interface FetchTransactionsOptions {
 
 interface TransactionsContextType {
   transactions: Transaction[]
-  isModalOpen: boolean
   transactionsPaginate: TransactionsPaginate
-  transactionsToEdit?: Transaction
   fetchTransactions: (options?: FetchTransactionsOptions) => Promise<void>
   createTransaction: (data: CreateTransactionInput) => Promise<void>
-  openModal: (open: boolean) => void
-  selectEditTransaction: (transaction: Transaction) => void
   editTransaction: (data: Transaction) => Promise<void>
   deleteTransaction: (id: number) => Promise<void>
 }
@@ -52,8 +48,6 @@ export const TransactionsContext = createContext({} as TransactionsContextType)
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [transactionsToEdit, setTransactionToEdit] = useState<Transaction>()
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [transactionsPaginate, setTransactionsPaginate] =
     useState<TransactionsPaginate>({} as TransactionsPaginate)
 
@@ -114,7 +108,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         transaction.id === data.id ? response.data : transaction,
       ),
     )
-    setTransactionToEdit(undefined)
   }, [])
 
   const deleteTransaction = useCallback(async (id: number) => {
@@ -125,19 +118,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     )
   }, [])
 
-  const selectEditTransaction = useCallback((transaction: Transaction) => {
-    setTransactionToEdit(transaction)
-    setIsModalOpen(true)
-  }, [])
-
-  const openModal = useCallback((open: boolean) => {
-    if (!open) {
-      setTransactionToEdit(undefined)
-    }
-
-    setIsModalOpen(open)
-  }, [])
-
   useEffect(() => {
     fetchTransactions()
   }, [fetchTransactions])
@@ -146,13 +126,9 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     <TransactionsContext.Provider
       value={{
         transactions,
-        isModalOpen,
         transactionsPaginate,
-        transactionsToEdit,
         fetchTransactions,
         createTransaction,
-        openModal,
-        selectEditTransaction,
         editTransaction,
         deleteTransaction,
       }}

@@ -24,46 +24,43 @@ import { useState } from 'react'
 
 export function Transactions() {
   const {
-    isModalOpen,
-    openModal,
     transactions,
-    selectEditTransaction,
+    editTransaction,
     createTransaction,
     deleteTransaction,
   } = useContextSelector(TransactionsContext, (context) => {
     return {
       transactions: context.transactions,
-      isModalOpen: context.isModalOpen,
-      openModal: context.openModal,
-      selectEditTransaction: context.selectEditTransaction,
+      editTransaction: context.editTransaction,
       createTransaction: context.createTransaction,
       deleteTransaction: context.deleteTransaction,
     }
   })
+
   const [isDuplicateModalOpen, setDuplicateModalOpen] = useState(false)
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [transactionToDuplicate, setTransactionToDuplicate] =
-    useState<Transaction>({} as Transaction)
-  const [transactionToDelete, setTransactionToDelete] = useState<Transaction>(
+  const [isEditModalOpen, setEditModalOpen] = useState(false)
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction>(
     {} as Transaction,
   )
 
   function handleCloseDuplicateModal() {
     setDuplicateModalOpen(false)
-    setTransactionToDuplicate({} as Transaction)
+    setSelectedTransaction({} as Transaction)
   }
 
   function handleCloseDeleteModal() {
     setDeleteModalOpen(false)
-    setTransactionToDelete({} as Transaction)
+    setSelectedTransaction({} as Transaction)
   }
 
-  function selectTransactionToDuplicate(transaction: Transaction) {
-    setTransactionToDuplicate(transaction)
+  function handleCloseEditModal() {
+    setEditModalOpen(false)
+    setSelectedTransaction({} as Transaction)
   }
 
-  function selectTransactionToDelete(transaction: Transaction) {
-    setTransactionToDelete(transaction)
+  function selectTransaction(transaction: Transaction) {
+    setSelectedTransaction(transaction)
   }
 
   async function handleDuplicateTransaction(transaction: Transaction) {
@@ -74,6 +71,11 @@ export function Transactions() {
   async function handleDeleteTransaction(transaction: Transaction) {
     await deleteTransaction(transaction.id)
     handleCloseDeleteModal()
+  }
+
+  async function handleEditTransaction(transaction: Partial<Transaction>) {
+    await editTransaction(transaction as Transaction)
+    handleCloseEditModal()
   }
 
   return (
@@ -108,9 +110,7 @@ export function Transactions() {
                       >
                         <Dialog.Trigger asChild>
                           <button
-                            onClick={() =>
-                              selectTransactionToDuplicate(transaction)
-                            }
+                            onClick={() => selectTransaction(transaction)}
                           >
                             <Copy size={20} />
                           </button>
@@ -118,24 +118,33 @@ export function Transactions() {
 
                         <ConfirmationModal
                           title="Duplicar Transação"
-                          message={`Tem certeza que deseja duplicar essa transação? ${transactionToDuplicate.id}`}
+                          message={`Tem certeza que deseja duplicar a transação "${selectedTransaction.description}"?`}
                           action={() =>
-                            handleDuplicateTransaction(transactionToDuplicate)
+                            handleDuplicateTransaction(selectedTransaction)
                           }
                           closeModal={handleCloseDuplicateModal}
                         />
                       </Dialog.Root>
 
-                      <Dialog.Root open={isModalOpen} onOpenChange={openModal}>
+                      <Dialog.Root
+                        open={isEditModalOpen}
+                        onOpenChange={setEditModalOpen}
+                      >
                         <Dialog.Trigger asChild>
                           <button
-                            onClick={() => selectEditTransaction(transaction)}
+                            onClick={() => selectTransaction(transaction)}
                           >
                             <PencilSimpleLine size={20} />
                           </button>
                         </Dialog.Trigger>
 
-                        <SaveTransactionModal />
+                        <SaveTransactionModal
+                          title="Editar Transação"
+                          buttonText="Editar"
+                          transactionToEdit={selectedTransaction}
+                          action={handleEditTransaction}
+                          closeModal={handleCloseEditModal}
+                        />
                       </Dialog.Root>
 
                       <Dialog.Root
@@ -144,9 +153,7 @@ export function Transactions() {
                       >
                         <Dialog.Trigger asChild>
                           <button
-                            onClick={() =>
-                              selectTransactionToDelete(transaction)
-                            }
+                            onClick={() => selectTransaction(transaction)}
                           >
                             <Trash size={20} />
                           </button>
@@ -154,9 +161,9 @@ export function Transactions() {
 
                         <ConfirmationModal
                           title="Deletar Transação"
-                          message={`Tem certeza que deseja deletar essa transação? ${transactionToDelete.id}`}
+                          message={`Tem certeza que deseja deletar a transação "${selectedTransaction.description}"?`}
                           action={() =>
-                            handleDeleteTransaction(transactionToDelete)
+                            handleDeleteTransaction(selectedTransaction)
                           }
                           closeModal={handleCloseDeleteModal}
                         />

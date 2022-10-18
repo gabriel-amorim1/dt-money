@@ -11,8 +11,7 @@ import {
 } from './styles'
 import { Controller, useForm } from 'react-hook-form'
 
-import { TransactionsContext } from '../../contexts/TransactionsContext'
-import { useContextSelector } from 'use-context-selector'
+import { Transaction } from '../../contexts/TransactionsContext'
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 
@@ -25,17 +24,21 @@ const newTransactionFormSchema = z.object({
 
 type NewTransactionFormInputs = z.infer<typeof newTransactionFormSchema>
 
-export function SaveTransactionModal() {
-  const { transactionsToEdit, createTransaction, openModal, editTransaction } =
-    useContextSelector(TransactionsContext, (context) => {
-      return {
-        transactionsToEdit: context.transactionsToEdit,
-        createTransaction: context.createTransaction,
-        openModal: context.openModal,
-        editTransaction: context.editTransaction,
-      }
-    })
+interface SaveModalProps {
+  transactionToEdit?: Transaction
+  title: string
+  buttonText: string
+  action: (transaction: Partial<Transaction>) => void
+  closeModal: () => void
+}
 
+export function SaveTransactionModal({
+  title,
+  buttonText,
+  transactionToEdit,
+  action,
+  closeModal,
+}: SaveModalProps) {
   const {
     control,
     register,
@@ -48,40 +51,22 @@ export function SaveTransactionModal() {
   })
 
   useEffect(() => {
-    if (transactionsToEdit) {
+    if (transactionToEdit) {
       const fields = ['description', 'price', 'category', 'type'] as const
 
-      fields.forEach((field) => setValue(field, transactionsToEdit[field]))
+      fields.forEach((field) => setValue(field, transactionToEdit[field]))
     }
-  }, [transactionsToEdit, setValue])
+  }, [transactionToEdit, setValue])
 
   async function handleCreateNewTransaction(data: NewTransactionFormInputs) {
-    const { description, price, category, type } = data
-
-    if (transactionsToEdit) {
-      await editTransaction({
-        ...transactionsToEdit,
-        description,
-        price,
-        category,
-        type,
-      })
-    } else {
-      await createTransaction({
-        description,
-        price,
-        category,
-        type,
-      })
-    }
-
+    action({ ...transactionToEdit, ...data })
     reset()
-    openModal(false)
+    closeModal()
   }
 
   function handleCloseModal() {
     reset()
-    openModal(false)
+    closeModal()
   }
 
   return (
@@ -89,7 +74,7 @@ export function SaveTransactionModal() {
       <Overlay />
 
       <Content>
-        <Dialog.Title>Nova Transação</Dialog.Title>
+        <Dialog.Title>{title}</Dialog.Title>
 
         <CloseButton onClick={handleCloseModal}>
           <X size={24} />
@@ -138,7 +123,7 @@ export function SaveTransactionModal() {
           />
 
           <button type="submit" disabled={isSubmitting}>
-            Cadastrar
+            {buttonText}
           </button>
         </form>
       </Content>

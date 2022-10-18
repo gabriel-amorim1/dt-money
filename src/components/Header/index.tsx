@@ -1,35 +1,75 @@
 import * as Dialog from '@radix-ui/react-dialog'
 
-import { HeaderContainer, HeaderContent, NewTransactionButton } from './styles'
+import {
+  BalanceContainer,
+  HeaderContainer,
+  HeaderContent,
+  InfoAndActionsContainer,
+  NewTransactionButton,
+} from './styles'
+import {
+  CreateTransactionInput,
+  Transaction,
+  TransactionsContext,
+} from '../../contexts/TransactionsContext'
+import { useContext, useState } from 'react'
 
+import { BalanceContext } from '../../contexts/BalanceContext'
 import { SaveTransactionModal } from '../SaveTransactionModal'
-import { TransactionsContext } from '../../contexts/TransactionsContext'
 import logoImg from '../../assets/logo.svg'
+import { priceFormatter } from '../../utils/formatter'
 import { useContextSelector } from 'use-context-selector'
 
 export function Header() {
-  const { isModalOpen, openModal } = useContextSelector(
+  const { createTransaction } = useContextSelector(
     TransactionsContext,
     (context) => {
       return {
-        isModalOpen: context.isModalOpen,
-        openModal: context.openModal,
+        createTransaction: context.createTransaction,
       }
     },
   )
+
+  const { balance } = useContext(BalanceContext)
+
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false)
+
+  function handleCloseCreateModal() {
+    setCreateModalOpen(false)
+  }
+
+  async function handleCreateTransaction(transaction: Partial<Transaction>) {
+    await createTransaction(transaction as CreateTransactionInput)
+    handleCloseCreateModal()
+  }
 
   return (
     <HeaderContainer>
       <HeaderContent>
         <img src={logoImg} alt="" />
 
-        <Dialog.Root open={isModalOpen} onOpenChange={openModal}>
-          <Dialog.Trigger asChild>
-            <NewTransactionButton>Nova transação</NewTransactionButton>
-          </Dialog.Trigger>
+        <InfoAndActionsContainer>
+          <BalanceContainer>
+            <strong>Saldo:</strong>
+            <span>{priceFormatter.format(balance)}</span>
+          </BalanceContainer>
 
-          <SaveTransactionModal />
-        </Dialog.Root>
+          <Dialog.Root
+            open={isCreateModalOpen}
+            onOpenChange={setCreateModalOpen}
+          >
+            <Dialog.Trigger asChild>
+              <NewTransactionButton>Nova transação</NewTransactionButton>
+            </Dialog.Trigger>
+
+            <SaveTransactionModal
+              title="Nova Transação"
+              buttonText="Salvar"
+              action={handleCreateTransaction}
+              closeModal={handleCloseCreateModal}
+            />
+          </Dialog.Root>
+        </InfoAndActionsContainer>
       </HeaderContent>
     </HeaderContainer>
   )

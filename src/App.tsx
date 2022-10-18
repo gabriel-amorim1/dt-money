@@ -1,3 +1,4 @@
+import { BalanceProvider } from './contexts/BalanceContext'
 import { GlobalStyle } from './styles/global'
 import { ThemeProvider } from 'styled-components'
 import { Transactions } from './pages/Transactions'
@@ -9,9 +10,11 @@ export function App() {
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyle />
 
-      <TransactionsProvider>
-        <Transactions />
-      </TransactionsProvider>
+      <BalanceProvider>
+        <TransactionsProvider>
+          <Transactions />
+        </TransactionsProvider>
+      </BalanceProvider>
     </ThemeProvider>
   )
 }
