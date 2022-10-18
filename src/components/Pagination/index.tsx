@@ -20,15 +20,9 @@ export function Pagination() {
   )
   const numberOfPages = Math.ceil(transactionsPaginate.total / 20)
 
-  function getPageList() {
-    const pageNumbersText = []
-
-    for (let i = 0; i < numberOfPages; i++) {
-      pageNumbersText.push(`${i + 1}`)
-    }
-
-    return pageNumbersText
-  }
+  const getPageList = Array(numberOfPages || 1)
+    .fill(0)
+    .map((_, i) => i + 1)
 
   function handleSelectPage(pageNumber: string) {
     fetchTransactions({ page: parseInt(pageNumber) })
@@ -42,13 +36,13 @@ export function Pagination() {
       >
         <ArrowLeft size={20} />
       </SelectPageButton>
-      {getPageList().map((pageNumber) => {
+      {getPageList.map((pageNumber) => {
         return (
           <PageNumberButton
             key={pageNumber}
             disabled={numberOfPages <= 1}
-            selected={pageNumber === String(transactionsPaginate.page) ?? true}
-            onClick={() => handleSelectPage(pageNumber)}
+            selected={pageNumber === transactionsPaginate.page ?? true}
+            onClick={() => handleSelectPage(String(pageNumber))}
           >
             {pageNumber}
           </PageNumberButton>
