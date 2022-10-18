@@ -121,7 +121,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     await api.delete(`transactions/${id}`)
 
     setTransactions((state) =>
-      state.filter((transaction) => transaction.id === id),
+      state.filter((transaction) => transaction.id !== id),
     )
   }, [])
 

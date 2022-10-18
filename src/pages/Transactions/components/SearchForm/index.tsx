@@ -4,6 +4,7 @@ import { MagnifyingGlass } from 'phosphor-react'
 import { SearchFormContainer } from './styles'
 import { TransactionsContext } from '../../../../contexts/TransactionsContext'
 import { useContextSelector } from 'use-context-selector'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
@@ -24,10 +25,21 @@ export function SearchForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { isSubmitting },
   } = useForm<SearchFormInputs>({
     resolver: zodResolver(searchFormSchema),
   })
+
+  useEffect(() => {
+    const now = new Date()
+
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+    setValue('initialDate', firstDay.toISOString().split('T')[0])
+    setValue('finalDate', lastDay.toISOString().split('T')[0])
+  }, [setValue])
 
   async function handleSearchTransactions(data: SearchFormInputs) {
     await fetchTransactions(data)
