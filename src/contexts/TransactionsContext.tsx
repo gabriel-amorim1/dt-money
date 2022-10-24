@@ -1,22 +1,38 @@
+/* eslint-disable no-unused-vars */
 import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 import { api } from '../lib/axios'
 import { createContext } from 'use-context-selector'
 
+export enum TransactionTypes {
+  RECEIPTS = 'RECEIPTS',
+  ESSENTIAL_EXPENSES = 'ESSENTIAL_EXPENSES',
+  NECESSARY_EXPENSES = 'NECESSARY_EXPENSES',
+  SUPERFLUOUS_EXPENSES = 'SUPERFLUOUS_EXPENSES',
+  INVESTMENTS = 'INVESTMENTS',
+}
+
 export interface Transaction {
   id: number
+  title: string
   description: string
-  type: 'income' | 'outcome'
+  type: TransactionTypes
   category: string
   price: number
+  compensated: boolean
+  clearingDate: string
   createdAt: string
+  compensatedAt?: string
 }
 
 export interface CreateTransactionInput {
+  title: string
   description: string
   price: number
   category: string
-  type: 'income' | 'outcome'
+  type: TransactionTypes
+  compensated: boolean
+  clearingDate: string
 }
 
 interface TransactionsPaginate {
@@ -24,9 +40,10 @@ interface TransactionsPaginate {
   total: number
 }
 
-interface FetchTransactionsOptions {
+export interface FetchTransactionsOptions {
   page?: number
   query?: string
+  type?: TransactionTypes
   initialDate?: string
   finalDate?: string
 }
@@ -60,8 +77,9 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
           _sort: 'createdAt',
           _order: 'desc',
           q: options?.query,
-          createdAt_gte: options?.initialDate,
-          createdAt_lte: options?.finalDate,
+          type: options?.type,
+          clearingDate_gte: options?.initialDate,
+          clearingDate_lte: options?.finalDate,
         },
       })
 
@@ -77,13 +95,24 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   const createTransaction = useCallback(
     async (data: CreateTransactionInput) => {
-      const { description, price, category, type } = data
-
-      const response = await api.post('transactions', {
+      const {
+        title,
         description,
         price,
         category,
         type,
+        clearingDate,
+        compensated,
+      } = data
+
+      const response = await api.post('transactions', {
+        title,
+        description,
+        price,
+        category,
+        type,
+        clearingDate,
+        compensated,
         createdAt: new Date(),
       })
 
@@ -93,14 +122,25 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   )
 
   const editTransaction = useCallback(async (data: Transaction) => {
-    const { description, price, category, type } = data
-
-    const response = await api.put(`transactions/${data.id}`, {
+    const {
+      id,
+      title,
       description,
       price,
       category,
       type,
-      createdAt: new Date(data.createdAt),
+      clearingDate,
+      compensated,
+    } = data
+
+    const response = await api.patch(`transactions/${id}`, {
+      title,
+      description,
+      price,
+      category,
+      type,
+      clearingDate,
+      compensated,
     })
 
     setTransactions((state) =>

@@ -1,3 +1,4 @@
+import { TransactionTypes } from '../../contexts/TransactionsContext'
 import styled from 'styled-components'
 
 export const TransactionsContainer = styled.main`
@@ -60,12 +61,12 @@ export const ButtonActionsContainer = styled.div`
 `
 
 interface PriceHighlightProps {
-  variant: 'income' | 'outcome'
+  variant: TransactionTypes
 }
 
 export const PriceHighlight = styled.span<PriceHighlightProps>`
   color: ${(props) =>
-    props.variant === 'income'
+    props.variant === TransactionTypes.RECEIPTS
       ? props.theme['green-300']
       : props.theme['red-300']};
 `

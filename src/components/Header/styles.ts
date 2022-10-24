@@ -19,6 +19,10 @@ export const HeaderContent = styled.div`
 export const InfoAndActionsContainer = styled.div`
   display: flex;
   gap: 2.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `
 
 export const BalanceContainer = styled.div`

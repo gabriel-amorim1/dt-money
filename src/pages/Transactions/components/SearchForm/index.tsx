@@ -1,15 +1,38 @@
 import * as z from 'zod'
 
+import { Controller, useForm } from 'react-hook-form'
+import {
+  FetchTransactionsOptions,
+  TransactionTypes,
+  TransactionsContext,
+} from '../../../../contexts/TransactionsContext'
+
 import { MagnifyingGlass } from 'phosphor-react'
 import { SearchFormContainer } from './styles'
-import { TransactionsContext } from '../../../../contexts/TransactionsContext'
 import { useContextSelector } from 'use-context-selector'
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+const translatedTypes = {
+  RECEIPTS: 'Receitas',
+  ESSENTIAL_EXPENSES: 'Despesas essenciais',
+  NECESSARY_EXPENSES: 'Despesas necessárias',
+  SUPERFLUOUS_EXPENSES: 'Despesas supérfluas',
+  INVESTMENTS: 'Investimentos',
+}
+
 const searchFormSchema = z.object({
-  query: z.string(),
+  query: z.string().optional(),
+  type: z
+    .enum([
+      'RECEIPTS',
+      'ESSENTIAL_EXPENSES',
+      'NECESSARY_EXPENSES',
+      'SUPERFLUOUS_EXPENSES',
+      'INVESTMENTS',
+      '',
+    ])
+    .optional(),
   initialDate: z.string(),
   finalDate: z.string(),
 })
@@ -26,6 +49,7 @@ export function SearchForm() {
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { isSubmitting },
   } = useForm<SearchFormInputs>({
     resolver: zodResolver(searchFormSchema),
@@ -42,7 +66,11 @@ export function SearchForm() {
   }, [setValue])
 
   async function handleSearchTransactions(data: SearchFormInputs) {
-    await fetchTransactions(data)
+    if (!data.type) {
+      delete data.type
+    }
+
+    await fetchTransactions(data as FetchTransactionsOptions)
   }
 
   return (
@@ -51,6 +79,33 @@ export function SearchForm() {
         type="text"
         placeholder="Busque por transações"
         {...register('query')}
+      />
+
+      <Controller
+        control={control}
+        name="type"
+        render={({ field }) => {
+          return (
+            <>
+              <select
+                onSelect={field.onChange}
+                onChange={field.onChange}
+                name="type"
+                id="type"
+                value={field.value || ''}
+              >
+                <option value="">Selecione uma opção...</option>
+                {Object.values(TransactionTypes).map((type) => {
+                  return (
+                    <option key={type} value={type}>
+                      {translatedTypes[type]}
+                    </option>
+                  )
+                })}
+              </select>
+            </>
+          )
+        }}
       />
 
       <input

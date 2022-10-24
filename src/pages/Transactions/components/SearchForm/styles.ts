@@ -2,9 +2,15 @@ import styled from 'styled-components'
 
 export const SearchFormContainer = styled.form`
   display: grid;
-  grid-template-columns: 2fr 0.75fr 0.75fr auto;
+  grid-template-columns: 1.25fr 0.75fr 0.75fr 0.75fr auto;
   gap: 1rem;
 
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  select,
   input {
     flex: 1;
     border-radius: 6px;
@@ -13,9 +19,17 @@ export const SearchFormContainer = styled.form`
     color: ${(props) => props.theme['gray-300']};
     padding: 1rem;
 
+    ::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+
     &::placeholder {
       color: ${(props) => props.theme['gray-500']};
     }
+  }
+
+  select {
+    border-right: 1rem solid transparent;
   }
 
   button {

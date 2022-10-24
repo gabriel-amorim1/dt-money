@@ -1,5 +1,5 @@
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 import * as Dialog from '@radix-ui/react-dialog'
-import * as RadioGroup from '@radix-ui/react-radio-group'
 
 import styled from 'styled-components'
 
@@ -20,47 +20,108 @@ export const Content = styled(Dialog.Content)`
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -45%);
+
+  max-height: 80vh;
+  overflow-y: auto;
 
   form {
     margin-top: 2rem;
 
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 2rem;
 
-    input {
+    input,
+    textarea {
       border-radius: 6px;
       border: 0;
       background: ${(props) => props.theme['gray-900']};
       color: ${(props) => props.theme['gray-300']};
       padding: 1rem;
 
+      ::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+      }
+
       &::placeholder {
         color: ${(props) => props.theme['gray-500']};
       }
     }
 
-    button[type='submit'] {
-      height: 58px;
-      border: 0;
-      background: ${(props) => props.theme['green-500']};
-      color: ${(props) => props.theme.white};
-      font-weight: bold;
-      padding: 0 1.25rem;
+    select {
       border-radius: 6px;
-      margin-top: 1.5rem;
-      cursor: pointer;
+      border: 0;
+      background: ${(props) => props.theme['gray-900']};
+      color: ${(props) => props.theme['gray-300']};
+      padding: 1rem;
 
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
+      border-right: 1rem solid transparent;
+    }
 
-      &:not(:disabled):hover {
-        background: ${(props) => props.theme['green-700']};
-        transition: background-color 0.2s;
-      }
+    textarea {
+      height: 90px;
+      resize: none;
+      display: block;
+      overflow: hidden;
+    }
+
+    label {
+      color: ${(props) => props.theme['gray-100']};
+    }
+  }
+`
+
+export const InputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`
+
+export const ActionButtonContainer = styled.div`
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  button {
+    flex: 1;
+    height: 58px;
+    border: 0;
+    background: ${(props) => props.theme['gray-600']};
+    color: ${(props) => props.theme['red-300']};
+    font-weight: bold;
+    padding: 0 1.25rem;
+    border-radius: 6px;
+    margin-top: 1.5rem;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+  }
+
+  button[type='submit'] {
+    height: 58px;
+    border: 0;
+    background: ${(props) => props.theme['green-500']};
+    color: ${(props) => props.theme.white};
+    font-weight: bold;
+    padding: 0 1.25rem;
+    border-radius: 6px;
+    margin-top: 1.5rem;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &:not(:disabled):hover {
+      background: ${(props) => props.theme['green-700']};
+      transition: background-color 0.2s;
     }
   }
 `
@@ -81,52 +142,32 @@ export const CloseButton = styled(Dialog.Close)`
   }
 `
 
-export const TransactionType = styled(RadioGroup.Root)`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-top: 0.5rem;
+export const CompensatedContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  padding-top: 0.5rem;
 `
 
-interface TransactionTypeButtonProps {
-  variant?: 'income' | 'outcome'
-}
+export const CompensatedLabel = styled.label`
+  color: ${(props) => props.theme['gray-300']};
+  padding-left: 1rem;
+  cursor: pointer;
+`
 
-export const TransactionTypeButton = styled(
-  RadioGroup.Item,
-)<TransactionTypeButtonProps>`
-  background: ${(props) => props.theme['gray-700']};
-  padding: 1rem;
+export const CompensatedCheckbox = styled(CheckboxPrimitive.Root)`
+  all: unset;
+  background: ${(props) => props.theme['gray-900']};
+  width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  cursor: pointer;
+`
+
+export const CompensatedCheckboxIndicator = styled(CheckboxPrimitive.Indicator)`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 0;
-  color: ${(props) => props.theme['gray-300']};
-
-  svg {
-    color: ${(props) =>
-      props.variant === 'income'
-        ? props.theme['green-300']
-        : props.theme['red-300']};
-  }
-
-  &[data-state='unchecked']:hover {
-    transition: background-color 0.2s;
-    background: ${(props) => props.theme['gray-600']};
-  }
-
-  &[data-state='checked'] {
-    color: ${(props) => props.theme.white};
-    background: ${(props) =>
-      props.variant === 'income'
-        ? props.theme['green-500']
-        : props.theme['red-500']};
-
-    svg {
-      color: ${(props) => props.theme.white};
-    }
-  }
+  color: ${(props) => props.theme.white};
 `

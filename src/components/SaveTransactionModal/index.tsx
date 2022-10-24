@@ -1,25 +1,49 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import * as z from 'zod'
 
-import { ArrowCircleDown, ArrowCircleUp, X } from 'phosphor-react'
 import {
+  ActionButtonContainer,
   CloseButton,
+  CompensatedCheckbox,
+  CompensatedCheckboxIndicator,
+  CompensatedContent,
+  CompensatedLabel,
   Content,
+  InputContainer,
   Overlay,
-  TransactionType,
-  TransactionTypeButton,
 } from './styles'
+import { Check, X } from 'phosphor-react'
 import { Controller, useForm } from 'react-hook-form'
+import {
+  Transaction,
+  TransactionTypes,
+} from '../../contexts/TransactionsContext'
 
-import { Transaction } from '../../contexts/TransactionsContext'
 import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+const translatedTypes = {
+  RECEIPTS: 'Receitas',
+  ESSENTIAL_EXPENSES: 'Despesas essenciais',
+  NECESSARY_EXPENSES: 'Despesas necessárias',
+  SUPERFLUOUS_EXPENSES: 'Despesas supérfluas',
+  INVESTMENTS: 'Investimentos',
+}
+
 const newTransactionFormSchema = z.object({
-  description: z.string(),
+  title: z.string(),
+  description: z.string().optional(),
   price: z.number(),
+  clearingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   category: z.string(),
-  type: z.enum(['income', 'outcome']),
+  type: z.enum([
+    'RECEIPTS',
+    'ESSENTIAL_EXPENSES',
+    'NECESSARY_EXPENSES',
+    'SUPERFLUOUS_EXPENSES',
+    'INVESTMENTS',
+  ]),
+  compensated: z.boolean().default(false),
 })
 
 type NewTransactionFormInputs = z.infer<typeof newTransactionFormSchema>
@@ -52,14 +76,26 @@ export function SaveTransactionModal({
 
   useEffect(() => {
     if (transactionToEdit) {
-      const fields = ['description', 'price', 'category', 'type'] as const
+      const fields = [
+        'title',
+        'description',
+        'price',
+        'category',
+        'type',
+        'compensated',
+        'clearingDate',
+        'compensated',
+      ] as const
 
-      fields.forEach((field) => setValue(field, transactionToEdit[field]))
+      fields.forEach((field) =>
+        setValue(field, transactionToEdit[field] as string),
+      )
     }
   }, [transactionToEdit, setValue])
 
   async function handleCreateNewTransaction(data: NewTransactionFormInputs) {
-    action({ ...transactionToEdit, ...data })
+    console.log(data)
+    action({ ...transactionToEdit, ...data } as Transaction)
     reset()
     closeModal()
   }
@@ -81,50 +117,123 @@ export function SaveTransactionModal({
         </CloseButton>
 
         <form onSubmit={handleSubmit(handleCreateNewTransaction)}>
-          <input
-            type="text"
-            placeholder="Descrição"
-            required
-            {...register('description')}
-          />
-          <input
-            type="number"
-            placeholder="Preço"
-            required
-            {...register('price', { valueAsNumber: true })}
-          />
-          <input
-            type="text"
-            placeholder="Categoria"
-            required
-            {...register('category')}
-          />
+          <InputContainer>
+            <label htmlFor="title">Título*</label>
+            <input
+              id="title"
+              type="text"
+              placeholder="Título"
+              required
+              {...register('title')}
+            />
+          </InputContainer>
+
+          <InputContainer>
+            <label htmlFor="description">Descrição</label>
+            <textarea
+              id="description"
+              placeholder="Descrição"
+              maxLength={150}
+              {...register('description')}
+            />
+          </InputContainer>
+
+          <InputContainer>
+            <label htmlFor="amount">Valor*</label>
+            <input
+              id="amount"
+              type="number"
+              placeholder="Preço"
+              required
+              {...register('price', { valueAsNumber: true })}
+            />
+          </InputContainer>
+
+          <InputContainer>
+            <label htmlFor="category">Categoria</label>
+            <input
+              id="category"
+              type="text"
+              placeholder="Categoria"
+              {...register('category')}
+            />
+          </InputContainer>
+
+          <InputContainer>
+            <label htmlFor="clearingDate">Data a ser compensada*</label>
+            <input
+              id="clearingDate"
+              type="date"
+              placeholder="Data de compensação"
+              required
+              {...register('clearingDate')}
+            />
+          </InputContainer>
+
+          <InputContainer>
+            <label htmlFor="type">Tipo*</label>
+            <Controller
+              control={control}
+              name="type"
+              render={({ field }) => {
+                return (
+                  <>
+                    <select
+                      required
+                      onSelect={field.onChange}
+                      onChange={field.onChange}
+                      name="type"
+                      id="type"
+                      value={field.value || ''}
+                    >
+                      <option value="" disabled>
+                        Selecione uma opção...
+                      </option>
+                      {Object.values(TransactionTypes).map((type) => {
+                        return (
+                          <option key={type} value={type}>
+                            {translatedTypes[type]}
+                          </option>
+                        )
+                      })}
+                    </select>
+                  </>
+                )
+              }}
+            />
+          </InputContainer>
 
           <Controller
             control={control}
-            name="type"
+            name="compensated"
             render={({ field }) => {
               return (
-                <TransactionType
-                  onValueChange={field.onChange}
-                  value={field.value}
-                >
-                  <TransactionTypeButton variant="income" value="income">
-                    <ArrowCircleUp size={24} />
-                    Entrada
-                  </TransactionTypeButton>
-                  <TransactionTypeButton variant="outcome" value="outcome">
-                    <ArrowCircleDown size={24} />
-                    Saída
-                  </TransactionTypeButton>
-                </TransactionType>
+                <CompensatedContent>
+                  <CompensatedCheckbox
+                    onCheckedChange={field.onChange}
+                    checked={field.value}
+                    id="compensated"
+                  >
+                    <CompensatedCheckboxIndicator>
+                      <Check size={16} />
+                    </CompensatedCheckboxIndicator>
+                  </CompensatedCheckbox>
+                  <CompensatedLabel htmlFor="compensated">
+                    Compensado
+                  </CompensatedLabel>
+                </CompensatedContent>
               )
             }}
           />
 
-          <button type="submit" disabled={isSubmitting}>
-            {buttonText}
-          </button>
+          <ActionButtonContainer>
+            <button type="button" onClick={handleCloseModal}>
+              Cancelar
+            </button>
+            <button type="submit" disabled={isSubmitting}>
+              {buttonText}
+            </button>
+          </ActionButtonContainer>
         </form>
       </Content>
     </Dialog.Portal>

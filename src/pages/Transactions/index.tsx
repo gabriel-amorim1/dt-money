@@ -9,9 +9,10 @@ import {
 import { Copy, PencilSimpleLine, Trash } from 'phosphor-react'
 import {
   Transaction,
+  TransactionTypes,
   TransactionsContext,
 } from '../../contexts/TransactionsContext'
-import { dateFormatter, priceFormatter } from '../../utils/formatter'
+import { priceFormatter, stringDateFormatter } from '../../utils/formatter'
 
 import { ConfirmationModal } from '../../components/ConfirmationModal'
 import { Header } from '../../components/Header'
@@ -21,6 +22,14 @@ import { SearchForm } from './components/SearchForm'
 import { Summary } from '../../components/Summary'
 import { useContextSelector } from 'use-context-selector'
 import { useState } from 'react'
+
+const translatedTypes = {
+  RECEIPTS: 'Receitas',
+  ESSENTIAL_EXPENSES: 'Despesas essenciais',
+  NECESSARY_EXPENSES: 'Despesas necessárias',
+  SUPERFLUOUS_EXPENSES: 'Despesas supérfluas',
+  INVESTMENTS: 'Investimentos',
+}
 
 export function Transactions() {
   const {
@@ -91,17 +100,15 @@ export function Transactions() {
             {transactions.map((transaction) => {
               return (
                 <tr key={transaction.id}>
-                  <td width="40%">{transaction.description}</td>
+                  <td width="40%">{transaction.title}</td>
                   <td>
                     <PriceHighlight variant={transaction.type}>
-                      {transaction.type === 'outcome' && '- '}
+                      {transaction.type !== TransactionTypes.RECEIPTS && '- '}
                       {priceFormatter.format(transaction.price)}
                     </PriceHighlight>
                   </td>
-                  <td>{transaction.category}</td>
-                  <td>
-                    {dateFormatter.format(new Date(transaction.createdAt))}
-                  </td>
+                  <td>{translatedTypes[transaction.type]}</td>
+                  <td>{stringDateFormatter(transaction.clearingDate)}</td>
                   <td>
                     <ButtonActionsContainer>
                       <Dialog.Root
@@ -161,7 +168,7 @@ export function Transactions() {
 
                         <ConfirmationModal
                           title="Deletar Transação"
-                          message={`Tem certeza que deseja deletar a transação "${selectedTransaction.description}"?`}
+                          message={`Tem certeza que deseja deletar a transação "${selectedTransaction.title}"?`}
                           action={() =>
                             handleDeleteTransaction(selectedTransaction)
                           }
