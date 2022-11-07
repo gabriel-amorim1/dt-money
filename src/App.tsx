@@ -1,20 +1,16 @@
-import { BalanceProvider } from './contexts/BalanceContext'
+import { BrowserRouter } from 'react-router-dom'
 import { GlobalStyle } from './styles/global'
+import { Router } from './Router'
 import { ThemeProvider } from 'styled-components'
-import { Transactions } from './pages/Transactions'
-import { TransactionsProvider } from './contexts/TransactionsContext'
 import { defaultTheme } from './styles/themes/default'
 
 export function App() {
   return (
     <ThemeProvider theme={defaultTheme}>
       <GlobalStyle />
-
-      <BalanceProvider>
-        <TransactionsProvider>
-          <Transactions />
-        </TransactionsProvider>
-      </BalanceProvider>
+      <BrowserRouter>
+        <Router />
+      </BrowserRouter>
     </ThemeProvider>
   )
 }

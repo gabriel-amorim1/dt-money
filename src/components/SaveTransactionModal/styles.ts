@@ -6,7 +6,7 @@ import styled from 'styled-components'
 export const Overlay = styled(Dialog.Overlay)`
   position: fixed;
   width: 100vw;
-  height: 100vh;
+  height: 100%;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
 `
