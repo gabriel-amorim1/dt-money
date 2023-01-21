@@ -100,11 +100,11 @@ export function Transactions() {
             {transactions.map((transaction) => {
               return (
                 <tr key={transaction.id}>
-                  <td width="40%">{transaction.title}</td>
+                  <td width="35%">{transaction.title}</td>
                   <td>
                     <PriceHighlight variant={transaction.type}>
                       {transaction.type !== TransactionTypes.RECEIPTS && '- '}
-                      {priceFormatter.format(transaction.price)}
+                      {priceFormatter.format(transaction.price)}{' '}
                     </PriceHighlight>
                   </td>
                   <td>{translatedTypes[transaction.type]}</td>

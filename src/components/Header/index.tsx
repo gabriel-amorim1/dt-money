@@ -12,10 +12,10 @@ import {
   Transaction,
   TransactionsContext,
 } from '../../contexts/TransactionsContext'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
-import { BalanceContext } from '../../contexts/BalanceContext'
 import { SaveTransactionModal } from '../SaveTransactionModal'
+import { UserContext } from '../../contexts/UserContext'
 import logoImg from '../../assets/logo.svg'
 import { priceFormatter } from '../../utils/formatter'
 import { useContextSelector } from 'use-context-selector'
@@ -30,9 +30,10 @@ export function Header() {
     },
   )
 
-  const { balance } = useContext(BalanceContext)
+  const userContext = useContext(UserContext)
 
   const [isCreateModalOpen, setCreateModalOpen] = useState(false)
+  const [balance, setBalance] = useState(0)
 
   function handleCloseCreateModal() {
     setCreateModalOpen(false)
@@ -42,6 +43,11 @@ export function Header() {
     await createTransaction(transaction as CreateTransactionInput)
     handleCloseCreateModal()
   }
+
+  useEffect(() => {
+    console.log(userContext)
+    setBalance(userContext.user.balance)
+  }, [userContext])
 
   return (
     <HeaderContainer>

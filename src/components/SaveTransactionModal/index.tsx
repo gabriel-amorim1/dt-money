@@ -94,10 +94,8 @@ export function SaveTransactionModal({
   }, [transactionToEdit, setValue])
 
   async function handleCreateNewTransaction(data: NewTransactionFormInputs) {
-    console.log(data)
     action({ ...transactionToEdit, ...data } as Transaction)
-    reset()
-    closeModal()
+    handleCloseModal()
   }
 
   function handleCloseModal() {
@@ -142,7 +140,7 @@ export function SaveTransactionModal({
             <label htmlFor="amount">Valor*</label>
             <input
               id="amount"
-              type="number"
+              type="decimal"
               placeholder="Preço"
               required
               {...register('price', { valueAsNumber: true })}

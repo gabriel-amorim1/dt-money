@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useContext, useEffect, useState } from 'react'
 
+import { UserContext } from './UserContext'
 import { api } from '../lib/axios'
 import { createContext } from 'use-context-selector'
 
@@ -23,6 +24,7 @@ export interface Transaction {
   clearingDate: string
   createdAt: string
   compensatedAt?: string
+  userId: string
 }
 
 export interface CreateTransactionInput {
@@ -64,6 +66,7 @@ interface TransactionsProviderProps {
 export const TransactionsContext = createContext({} as TransactionsContextType)
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
+  const userContext = useContext(UserContext)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [transactionsPaginate, setTransactionsPaginate] =
     useState<TransactionsPaginate>({} as TransactionsPaginate)
@@ -81,6 +84,9 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
           clearingDate_gte: options?.initialDate,
           clearingDate_lte: options?.finalDate,
         },
+        headers: {
+          Authorization: userContext.token,
+        },
       })
 
       setTransactionsPaginate({
@@ -90,7 +96,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
       setTransactions(response.data)
     },
-    [],
+    [userContext],
   )
 
   const createTransaction = useCallback(
@@ -105,7 +111,35 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         compensated,
       } = data
 
-      const response = await api.post('transactions', {
+      const response = await api.post(
+        'transactions',
+        {
+          title,
+          description,
+          price,
+          category,
+          type,
+          clearingDate,
+          compensated,
+          createdAt: new Date(),
+          userId: userContext.user.id,
+        },
+        {
+          headers: {
+            Authorization: userContext.token,
+          },
+        },
+      )
+
+      setTransactions((state) => [response.data, ...state])
+    },
+    [userContext],
+  )
+
+  const editTransaction = useCallback(
+    async (data: Transaction) => {
+      const {
+        id,
         title,
         description,
         price,
@@ -113,50 +147,49 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         type,
         clearingDate,
         compensated,
-        createdAt: new Date(),
-      })
+      } = data
 
-      setTransactions((state) => [response.data, ...state])
+      const response = await api.patch(
+        `transactions/${id}`,
+        {
+          title,
+          description,
+          price,
+          category,
+          type,
+          clearingDate,
+          compensated,
+        },
+        {
+          headers: {
+            Authorization: userContext.token,
+          },
+        },
+      )
+
+      setTransactions((state) =>
+        state.map((transaction) =>
+          transaction.id === data.id ? response.data : transaction,
+        ),
+      )
     },
-    [],
+    [userContext],
   )
 
-  const editTransaction = useCallback(async (data: Transaction) => {
-    const {
-      id,
-      title,
-      description,
-      price,
-      category,
-      type,
-      clearingDate,
-      compensated,
-    } = data
+  const deleteTransaction = useCallback(
+    async (id: number) => {
+      await api.delete(`transactions/${id}`, {
+        headers: {
+          Authorization: userContext.token,
+        },
+      })
 
-    const response = await api.patch(`transactions/${id}`, {
-      title,
-      description,
-      price,
-      category,
-      type,
-      clearingDate,
-      compensated,
-    })
-
-    setTransactions((state) =>
-      state.map((transaction) =>
-        transaction.id === data.id ? response.data : transaction,
-      ),
-    )
-  }, [])
-
-  const deleteTransaction = useCallback(async (id: number) => {
-    await api.delete(`transactions/${id}`)
-
-    setTransactions((state) =>
-      state.filter((transaction) => transaction.id !== id),
-    )
-  }, [])
+      setTransactions((state) =>
+        state.filter((transaction) => transaction.id !== id),
+      )
+    },
+    [userContext],
+  )
 
   useEffect(() => {
     fetchTransactions()
